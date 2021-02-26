@@ -1,0 +1,44 @@
+import tensorflow as tf
+import numpy
+import matplotlib.pyplot as plt
+from tensorflow import keras
+
+# Traditional split between training/validating/testing =  70/20/10 or 80/10/10 percent
+# Load dataset from keras
+fashion_mnist = keras.datasets.fashion_mnist
+# Define 4 arrays containing testing and training data
+(train_images, train_labels), (test_images, test_labels) = fashion_mnist.load_data()
+# Look at data
+plt.figure()
+# Specify what to plot, i.e. the first element in the array train_imgs
+plt.imshow(train_images[0])
+# Change settings for the type of figure that will be produced
+plt.colorbar()
+plt.grid(False)
+plt.show()
+
+#The greyscale assigned to each pixel within an image has a value range of 0-255. We will want to flatten this range to 0-1.
+#To achieve this flattening, we will exploit the data structure that our images are stored in, arrays. Each image is stored as a 2-dimensional array where each numerical value in the array is the greyscale code of particular pixel. Conveniently, if we divide an entire array by a scalar we generate a new array whose elements are the original elements divided by the scalar.
+train_images = train_images / 255.0
+test_images = test_images / 255.0
+
+# This NN contains 3 layers
+# Layer 1 = Input Layer i.e. takes a multidimensional array (image, in this case measuring 28 by 28) and flattens it to a unidimensional array (28*28=784)
+# Layers 2 + 3 = Dense Layers
+# Each layer can have its own mathematical operation
+model = keras.Sequential([keras.layers.Flatten(input_shape=(28,28)), keras.layers.Dense(128,activation=tf.nn.relu), keras.layers.Dense(10, activation=tf.nn.softmax)])
+# Layer 1's function is to flatten(?), Layer 2's is a Rectified Linear Unit (RELU), Layer 3's is a softmax activation function
+# Softmax gives the probability that a given image belongs to each of the category labels
+
+# Evaluating the model
+# model.evaluate returns a) value of the "loss" function (= errors) b) accuracy of the model over the test population
+test_loss, test_acc = model.evaluate(test_images, test_labels)
+
+# Overfitting occurs when there are too many parameters within the model when compared to the number of training instances; this allows the model to over learn on those limited examples.
+# Overfitting leads to better model performance over non-training data.
+predictions = model.predict(test_images)
+predictions[0] # prints an array consisting of the likelihoods that the given image should be classified as each label in the list of possibilities. Highest probability is the winner \
+# To show only the highest probability i.e. the winner:
+numpy.argmax(predictions[0])
+# Verify by looking at the actual label
+print(test_labels[0])
